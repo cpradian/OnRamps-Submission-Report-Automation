@@ -45,8 +45,8 @@ def run_gather_links(webdriver_path, general_links_path):
     # allow 30 seconds to complete login process
     time.sleep(30) 
 
-    # for i in range(len(urls)):
-    for i in range(3):
+    for i in range(len(urls)):
+        print(instructors[i])
         # Go to target page
         driver.get(urls[i])
         # Wait for 5 seconds to fully load
@@ -98,7 +98,7 @@ def run_gather_links(webdriver_path, general_links_path):
         time.sleep(1)
 
     # Convert gathered data to csv file
-    finished = pd.DataFrame({'Instructor': instructors[:3],
+    finished = pd.DataFrame({'Instructor': instructors,
                             'Post Lab 1 Link': post_lab1_links,
                             'Post Lab 2 Link': post_lab2_links,
                             'Post Lab 3 Link': post_lab3_links,
@@ -108,7 +108,7 @@ def run_gather_links(webdriver_path, general_links_path):
                             'Post Lab 7 Link': post_lab7_links,
                             'Post Lab 8 Link': post_lab8_links
                             })
-    finished.to_csv("Post-Lab Links Test.csv", index=False)
+    finished.to_csv("Post-Lab Links New.csv", index=False)
 
     # Close the driver
     driver.close()
