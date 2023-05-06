@@ -2,7 +2,7 @@
 import selenium
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -11,9 +11,9 @@ import pandas as pd
 
 
 # specify the download directory
-options = ChromeOptions()
+options = EdgeOptions()
 
-options = ChromeOptions()
+options = EdgeOptions()
 options.use_chromium = True
 options.add_experimental_option("prefs", {
   # change download directory here:
@@ -22,7 +22,7 @@ options.add_experimental_option("prefs", {
 })
 
 # provide the path to the installed webdriver here:
-driver = webdriver.Chrome(executable_path=r"C:\Users\Calvin Pradian\Documents\OnRamps\Web Scraper\msedgedriver.exe", options=options)
+driver = webdriver.Edge(executable_path=r"C:\Users\Calvin Pradian\Documents\OnRamps\Web Scraper\msedgedriver.exe", options=options)
 
 
 # read csv file to get list of links
