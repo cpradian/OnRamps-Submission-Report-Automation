@@ -99,14 +99,14 @@ def run_gather_links(webdriver_path, general_links_path):
 
     # Convert gathered data to csv file
     finished = pd.DataFrame({'Instructor': instructors,
-                            'Post Lab 1 Link': post_lab1_links,
-                            'Post Lab 2 Link': post_lab2_links,
-                            'Post Lab 3 Link': post_lab3_links,
-                            'Post Lab 4 Link': post_lab4_links,
-                            'Post Lab 5 Link': post_lab5_links,
-                            'Post Lab 6 Link': post_lab6_links,
-                            'Post Lab 7 Link': post_lab7_links,
-                            'Post Lab 8 Link': post_lab8_links
+                            'Post-Lab 1 Link': post_lab1_links,
+                            'Post-Lab 2 Link': post_lab2_links,
+                            'Post-Lab 3 Link': post_lab3_links,
+                            'Post-Lab 4 Link': post_lab4_links,
+                            'Post-Lab 5 Link': post_lab5_links,
+                            'Post-Lab 6 Link': post_lab6_links,
+                            'Post-Lab 7 Link': post_lab7_links,
+                            'Post-Lab 8 Link': post_lab8_links
                             })
     finished.to_csv("Post-Lab Links New.csv", index=False)
 

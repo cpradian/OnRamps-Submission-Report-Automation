@@ -17,21 +17,21 @@ options = EdgeOptions()
 options.use_chromium = True
 options.add_experimental_option("prefs", {
   # change download directory here:
-  "download.default_directory": r"C:\Users\Calvin Pradian\Box\22-23 PHY Student Graders\PHY 22-23 Lab Submission Reports\Lab 3 Test"
+  "download.default_directory": r"C:\Users\calvi\OneDrive\Documents\OnRamps\Report Download Script\OnRamps-Submission-Report-Automation\download_test"
   
 })
 
 # provide the path to the installed webdriver here:
-driver = webdriver.Edge(executable_path=r"C:\Users\Calvin Pradian\Documents\OnRamps\Web Scraper\msedgedriver.exe", options=options)
+driver = webdriver.Edge(executable_path=r"C:\Users\calvi\OneDrive\Documents\OnRamps\Report Download Script\OnRamps-Submission-Report-Automation\msedgedriver.exe", options=options)
 
 
 # read csv file to get list of links
 # provide path to csv file w/ links here:
-dataset = pd.read_csv(r"C:\Users\Calvin Pradian\Documents\OnRamps\Gather Links Instructions\Post-Lab Links.csv")
+dataset = pd.read_csv(r"C:\Users\calvi\OneDrive\Documents\OnRamps\Report Download Script\OnRamps-Submission-Report-Automation\Post-Lab Links New.csv")
 
 # Grab only the column with the links and make an array
 # Specify which Post Lab # here:
-urls = dataset["Post Lab 3 Link"]
+urls = dataset["Post Lab 1 Link"]
 
 # this list will keep track of which instructors don't have quiz statistics
 no_stats = []
