@@ -110,11 +110,17 @@ def canvas_scraper(driver_path, download_path, postlab_links_dir, lab_num):
             try:
                 student_analysis = driver.find_element("xpath", '//*[@id="summary-statistics"]/header/div/div[2]/div/a/span[2]').click()
                 time.sleep(1)
-                new_name = instructors[i] + " " + lab_num + r" Quiz Student Analysis Report.csv"
-                rename_latest_file(download_path, new_name)
+                # check if file has been downloaded and rename
+                old_name = lab_num + r" Quiz Student Analysis Report.csv"
+                if wait_for_file(download_path, old_name):
+                    new_name = instructors[i] + " " + lab_num + r" Quiz Student Analysis Report.csv"
+                    rename_latest_file(download_path, new_name)
+                else:
+                    print(instructors[i] + " timed out. Did not download report")
             # if report hasn't been generated yet, click button and wait for report to generate
             except:
                 student_analysis = driver.find_element("xpath", '//*[@id="summary-statistics"]/header/div/div[2]/div/button').click()
+                # check if file has been downloaded then rename
                 old_name = lab_num + r" Quiz Student Analysis Report.csv"
                 if wait_for_file(download_path, old_name):
                     new_name = instructors[i] + " " + lab_num + r" Quiz Student Analysis Report.csv"
