@@ -1,3 +1,5 @@
+# canvas_scraper.py
+
 # import necessary libraries 
 import selenium
 from selenium import webdriver
@@ -9,65 +11,17 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import pandas as pd
 
+class CanvasScraper:
+    def __init__(self, driver_path):
 
-# specify the download directory
-options = EdgeOptions()
+        options = EdgeOptions()
+        options.use_chromium = True
 
-options = EdgeOptions()
-options.use_chromium = True
-options.add_experimental_option("prefs", {
-  # change download directory here:
-  "download.default_directory": r"C:\Users\calvi\OneDrive\Documents\OnRamps\Report Download Script\OnRamps-Submission-Report-Automation\download_test"
-  
-})
-
-# provide the path to the installed webdriver here:
-driver = webdriver.Edge(executable_path=r"C:\Users\calvi\OneDrive\Documents\OnRamps\Report Download Script\OnRamps-Submission-Report-Automation\msedgedriver.exe", options=options)
-
-
-# read csv file to get list of links
-# provide path to csv file w/ links here:
-dataset = pd.read_csv(r"C:\Users\calvi\OneDrive\Documents\OnRamps\Report Download Script\OnRamps-Submission-Report-Automation\Post-Lab Links New.csv")
-
-# Grab only the column with the links and make an array
-# Specify which Post Lab # here:
-urls = dataset["Post Lab 1 Link"]
-
-# this list will keep track of which instructors don't have quiz statistics
-no_stats = []
-
-# do log in process
-driver.get(urls[0])
-# allow 30 seconds to complete login process
-time.sleep(30) 
-
-for i in range(len(urls)):
-    # Go to target page
-    driver.get(urls[i])
-    # Wait for 5 seconds to fully load
-    time.sleep(3)
-    # Locate the quiz statistics button and click
-    quiz_statistics = driver.find_element("xpath", '/html/body/div[3]/div[2]/div[2]/div[3]/div[2]/aside/div/ul/li[1]/a').click()
-    # quiz_statistics = driver.find_element("xpath", '//*[@id="sidebar_content"]/ul/li[1]/a').click()
-    time.sleep(3)
-    # try to see if the instructor has quiz statistics
-    try:
-      # try finding summary statistics if report already generated
-      try:
-        student_analysis = driver.find_element("xpath", '//*[@id="summary-statistics"]/header/div/div[2]/div/a/span[2]').click()
-        # if report hasn't been generated yet, click button and wait for report to generate
-      except:
-        student_analysis = driver.find_element("xpath", '//*[@id="summary-statistics"]/header/div/div[2]/div/button').click()
-        time.sleep(60)
-    except:
-      no_stats.append(i)
-      # print("Does not have quiz statistics")
-    time.sleep(5)
-
-print("\n\n")
-print("Instructor indices with no statistics:")
-print(no_stats)
-print("\nScript Complete!")
-
-# Close the driver
-driver.close()
+        # provide the path to the installed webdriver here:
+        driver = webdriver.Edge(executable_path=driver_path, options=options)
+    
+    def login(self, url):
+        # navigate to a canvas webpage which will prompt login
+        self.driver.get(url)
+        # allow 30 seconds to complete login process
+        time.sleep(30) 

@@ -1,7 +1,16 @@
-def wait_for_file(directory, filename, timeout=300):
-    import os
-    import time
+# import necessary libraries 
+import selenium
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import os
+import time
+import pandas as pd
 
+def wait_for_file(directory, filename, timeout=300):
     """
     Wait for the specified file to appear in the specified directory.
     
@@ -24,8 +33,6 @@ def wait_for_file(directory, filename, timeout=300):
 
 
 def rename_latest_file(directory, new_filename):
-    import os
-
     """
     Rename the most recent file in the specified directory to the specified filename.
     
@@ -45,18 +52,6 @@ def rename_latest_file(directory, new_filename):
 
 
 def canvas_scraper(driver_path, download_path, postlab_links_dir, lab_num):
-    # import necessary libraries 
-    import selenium
-    from selenium import webdriver
-    from selenium.webdriver.common.keys import Keys
-    from selenium.webdriver.edge.options import Options as EdgeOptions
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
-    import time
-    import pandas as pd
-
-
     # specify the download directory
     download_path = download_path.replace("/", "\\")
     raw_download_path = r"{}".format(download_path)
@@ -68,12 +63,10 @@ def canvas_scraper(driver_path, download_path, postlab_links_dir, lab_num):
     options.add_experimental_option("prefs", {
     # change download directory here:
     "download.default_directory": raw_download_path
-
     })
 
     # provide the path to the installed webdriver here:
     driver = webdriver.Edge(executable_path=driver_path, options=options)
-
 
     # read csv file to get list of links
     # provide path to csv file w/ links here:

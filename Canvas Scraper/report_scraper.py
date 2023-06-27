@@ -1,0 +1,134 @@
+# report_scraper.py
+
+# import necessary libraries 
+import selenium
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import os
+import time
+import pandas as pd
+
+from canvas_scraper import CanvasScraper
+
+# This class extends the existing Scraper class
+class ReportScraper(CanvasScraper):
+    def __init__(self, driver_path, download_path, postlab_links_dir, lab_num):
+        super().__init__(driver_path)
+        # Initialize variables
+        self.download_path = download_path
+        self.postlab_links_dir = postlab_links_dir
+        self.lab_num = lab_num
+
+
+    def rename_latest_file(self, directory, new_filename):
+        """
+        Rename the most recent file in the specified directory to the specified filename.
+        
+        Args:
+            directory (str): The directory containing the files to rename.
+            new_filename (str): The new filename to give to the most recent file.
+        """
+        # Get list of files in directory
+        files = [os.path.join(directory, filename) for filename in os.listdir(directory)]
+        
+        # Sort files by modification time (most recent first)
+        files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+        
+        # Rename most recent file to new filename
+        most_recent_file = files[0]
+        os.rename(most_recent_file, os.path.join(directory, new_filename))
+
+
+    def wait_for_file(self, directory, filename, timeout=300):
+        """
+        Wait for the specified file to appear in the specified directory.
+        
+        Args:
+            directory (str): The directory to check for the file.
+            filename (str): The name of the file to check for.
+            timeout (int): The maximum amount of time to wait for the file to appear, in seconds.
+            
+        Returns:
+            bool: True if the file was found before the timeout, False otherwise.
+        """
+        start_time = time.time()
+        while True:
+            filepath = os.path.join(directory, filename)
+            if os.path.isfile(filepath):
+                return True
+            if time.time() - start_time > timeout:
+                return False
+            time.sleep(1)
+    
+
+    def scrape_reports(self):
+        # read csv file to get list of links
+        # provide path to csv file w/ links here:
+        dataset = pd.read_csv(self.postlab_links_dir)
+
+        # Grab only the column with the links and make an array
+        lab = self.lab_num + " Link"
+        urls = dataset[lab]
+
+        instructors = dataset['Instructor']
+
+        # this list will keep track of which instructors don't have quiz statistics
+        no_stats = []
+
+        # do log in process
+        self.login(urls[0])
+
+        for i in range(len(urls)):
+            # Go to target page
+            self.driver.get(urls[i])
+
+            # Wait for 3 seconds to fully load
+            time.sleep(3)
+
+            # Locate the quiz statistics button and click
+            quiz_statistics = self.driver.find_element("xpath", '/html/body/div[3]/div[2]/div[2]/div[3]/div[2]/aside/div/ul/li[1]/a').click()
+            time.sleep(3)
+
+            # try to see if the instructor has quiz statistics
+            try:
+            # try finding summary statistics if report already generated
+                try:
+                    student_analysis = self.driver.find_element("xpath", '//*[@id="summary-statistics"]/header/div/div[2]/div/a/span[2]').click()
+                    time.sleep(1)
+                    # check if file has been downloaded and rename
+                    old_name = self.lab_num + r" Quiz Student Analysis Report.csv"
+                    if self.wait_for_file(self.download_path, old_name):
+                        new_name = instructors[i] + " " + self.lab_num + r" Quiz Student Analysis Report.csv"
+                        self.rename_latest_file(self.download_path, new_name)
+                    else:
+                        print(instructors[i] + " timed out. Did not download report")
+                # if report hasn't been generated yet, click button and wait for report to generate
+                except:
+                    student_analysis = self.driver.find_element("xpath", '//*[@id="summary-statistics"]/header/div/div[2]/div/button').click()
+                    # check if file has been downloaded then rename
+                    old_name = self.lab_num + r" Quiz Student Analysis Report.csv"
+                    if self.wait_for_file(self.download_path, old_name):
+                        new_name = instructors[i] + " " + self.lab_num + r" Quiz Student Analysis Report.csv"
+                        self.rename_latest_file(self.download_path, new_name)
+                    else:
+                        print(instructors[i] + " timed out. Did not download report")
+            except:
+                no_stats.append(i)
+            
+            time.sleep(5)
+
+        print("\n\n")
+        print("Instructor indices with no statistics:")
+        for n in no_stats:
+            print(instructors[n])
+        print("\nScript Complete!")
+
+        # Close the driver
+        self.driver.close()
+
+            
+
