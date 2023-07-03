@@ -18,7 +18,7 @@ class CanvasScraper:
         options.use_chromium = True
 
         # provide the path to the installed webdriver here:
-        driver = webdriver.Edge(executable_path=driver_path, options=options)
+        self.driver = webdriver.Edge(executable_path=driver_path, options=options)
     
     def login(self, url):
         # navigate to a canvas webpage which will prompt login

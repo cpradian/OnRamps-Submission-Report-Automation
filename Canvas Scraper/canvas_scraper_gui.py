@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-import canvas_scraper_function
-from canvas_scraper_function import canvas_scraper
+from report_scraper import ReportScraper
 
 class WebScraperGUI:
     def __init__(self):
@@ -94,6 +93,8 @@ class WebScraperGUI:
         download_path = self.download_path.get()
         postlab_links_dir = self.csv_path.get()
         lab_num = self.selected_lab.get()
-        canvas_scraper(driver_path, download_path, postlab_links_dir, lab_num)
+        scraper = ReportScraper(driver_path, download_path, postlab_links_dir, lab_num)
+        scraper.scrape_reports()
+        # canvas_scraper(driver_path, download_path, postlab_links_dir, lab_num)
 
 WebScraperGUI()
