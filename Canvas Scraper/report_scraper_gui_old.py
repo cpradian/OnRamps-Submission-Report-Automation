@@ -89,9 +89,11 @@ class WebScraperGUI:
         self.download_path.set(filepath)
 
     def start_scraper(self):
+        # Get information from text fields
         driver_path = self.webdriver_path.get()
         download_path = self.download_path.get()
         postlab_links_dir = self.csv_path.get()
+        
         lab_num = self.selected_lab.get()
         scraper = ReportScraper(driver_path, download_path, postlab_links_dir, lab_num)
         scraper.scrape_reports()

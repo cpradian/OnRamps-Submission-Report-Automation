@@ -16,15 +16,24 @@ from canvas_scraper import CanvasScraper
 
 # This class extends the existing Scraper class
 class ReportScraper(CanvasScraper):
-    def __init__(self, driver_path, download_path, links_path, lab_num):
+
+    def __init__(self, driver_path, download_path, postlab_links_dir, lab_num):
         # Initialize variables
-        super().__init__(driver_path=driver_path)
         self.download_path = download_path
-        self.assignment_df = pd.read_csv(links_path)
-        self.courses = self.assignment_df["College Course"].str[13:]
-        self.links = self.assignment_df["Canvas Link"]
+        self.postlab_links_dir = postlab_links_dir
+        self.lab_num = lab_num
         # Hashset filled with unique urls that have been looped through
         self.url_set = set()
+
+        # read csv file to get list of links
+        # provide path to csv file w/ links here:
+        self.dataset = pd.read_csv(self.postlab_links_dir)
+
+        # Grab only the column with the links and make an array
+        lab = self.lab_num + " Link"
+        self.urls = self.dataset[lab]
+
+        self.instructors = self.dataset['Instructor']
 
     # This function will rename the latest file added to a specified directory    
     def rename_latest_file(self, directory, new_filename):
@@ -92,15 +101,6 @@ class ReportScraper(CanvasScraper):
             else:
                 print(self.instructors[i] + " timed out. Did not download report")
 
-    # Use hashset to store unique urls. If the url has been added, 
-    def check_duplicate_urls(self, url):
-        if url in self.url_set:
-            print(f"Duplicate URL found: {url}")
-            return True
-        else:
-            self.url_set.add(url)
-            return False
-    
     # This is the main function that will execute the webscraper
     def scrape_reports(self):
         # this list will keep track of which instructors don't have quiz statistics
@@ -110,10 +110,6 @@ class ReportScraper(CanvasScraper):
         self.login(self.urls[0])
 
         for i in range(len(self.urls)):
-            # Check if link has already been iterated through
-            if self.check_duplicate_urls(url=self.urls[i]):
-                continue
-
             # Go to target page
             self.driver.get(self.urls[i])
 
@@ -142,3 +138,6 @@ class ReportScraper(CanvasScraper):
 
         # Close the driver
         self.driver.close()
+
+            
+
