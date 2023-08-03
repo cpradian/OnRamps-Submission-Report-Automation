@@ -11,29 +11,41 @@ from selenium.webdriver.support import expected_conditions as EC
 import os
 import time
 import pandas as pd
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 from canvas_scraper import CanvasScraper
+from event_handler import MyHandler
 
 # This class extends the existing Scraper class
 class ReportScraper(CanvasScraper):
-    def __init__(self, driver_path, download_path, links_path, lab_num):
+    def __init__(self, download_path, links_path):
         # Initialize variables
-        super().__init__(driver_path=driver_path)
+        options = ChromeOptions()
+        options.use_chromium = True
+        options.add_experimental_option("prefs", {
+        "download.default_directory": download_path
+
+        })
+
+        # provide the path to the installed webdriver here:
+        self.driver = webdriver.Chrome(options=options)
+
         self.download_path = download_path
         self.assignment_df = pd.read_csv(links_path)
-        self.courses = self.assignment_df["College Course"].str[13:]
-        self.links = self.assignment_df["Canvas Link"]
+        self.instructors = self.assignment_df["College Course"].str[13:]
+        self.urls = self.assignment_df["Canvas Link"]
         # Hashset filled with unique urls that have been looped through
         self.url_set = set()
 
     # This function will rename the latest file added to a specified directory    
-    def rename_latest_file(self, directory, new_filename):
+    def rename_latest_file(self, directory, course_name):
         """
         Rename the most recent file in the specified directory to the specified filename.
         
         Args:
             directory (str): The directory containing the files to rename.
-            new_filename (str): The new filename to give to the most recent file.
+            course_name (str): The string to prepend to the filename.
         """
         # Get list of files in directory
         files = [os.path.join(directory, filename) for filename in os.listdir(directory)]
@@ -43,55 +55,62 @@ class ReportScraper(CanvasScraper):
         
         # Rename most recent file to new filename
         most_recent_file = files[0]
+        old_filename = os.path.basename(most_recent_file)  # Extract the filename from the path
+        new_filename = course_name + " " + old_filename  # Prepend the course_name to the filename
         os.rename(most_recent_file, os.path.join(directory, new_filename))
 
-    # This function will wait a maximum of 300 seconds for the report to generate and download
-    def wait_for_file(self, directory, filename, timeout=300):
-        """
-        Wait for the specified file to appear in the specified directory.
-        
-        Args:
-            directory (str): The directory to check for the file.
-            filename (str): The name of the file to check for.
-            timeout (int): The maximum amount of time to wait for the file to appear, in seconds.
-            
-        Returns:
-            bool: True if the file was found before the timeout, False otherwise.
-        """
+    def wait_for_file(self, initial_files, directory, timeout=300):
+        # Get the current time
         start_time = time.time()
+
+        # Start a loop that will run until timout has passed
         while True:
-            filepath = os.path.join(directory, filename)
-            if os.path.isfile(filepath):
+            # Get a set of all files currently in the directory
+            current_files = set(os.listdir(directory))
+            # Subtract the initial set of files from the current set to find any new files
+            new_files = current_files - initial_files
+
+            # Print the current files and the new files
+            print(f"Current files: {current_files}")
+            print(f"New files: {new_files}")
+
+            # If there are any new files, return True
+            if new_files:
                 return True
+
+            # If the timeout has been exceeded, return False
             if time.time() - start_time > timeout:
                 return False
+
+            # Sleep for 1 second before repeating the loop
             time.sleep(1)
-    
-    # This function will check if a report is already generated
-    # If it is already generated, it will download. If not, it will call the wait_for_file function
+
     def generate_report(self, i):
         # try finding summary statistics if report already generated
         try:
+            # Get initial set of files in the directory
+            initial_files = set(os.listdir(self.download_path))
+
+            # Initiate the file download
             student_analysis = self.driver.find_element("xpath", '//*[@id="summary-statistics"]/header/div/div[2]/div/a/span[2]').click()
-            time.sleep(1)
-            # check if file has been downloaded and rename
-            old_name = self.lab_num + r" Quiz Student Analysis Report.csv"
-            if self.wait_for_file(self.download_path, old_name):
-                new_name = self.instructors[i] + " " + self.lab_num + r" Quiz Student Analysis Report.csv"
-                self.rename_latest_file(self.download_path, new_name)
-            else:
-                print(self.instructors[i] + " timed out. Did not download report")
+            
+            time.sleep(3)
+
+            # Wait for the file to be downloaded
+            if self.wait_for_file(initial_files, directory=self.download_path):
+                course_name = self.instructors[i]
+                self.rename_latest_file(self.download_path, course_name)
+
         # if report hasn't been generated yet, click button and wait for report to generate
         except:
             student_analysis = self.driver.find_element("xpath", '//*[@id="summary-statistics"]/header/div/div[2]/div/button').click()
             # check if file has been downloaded then rename
-            old_name = self.lab_num + r" Quiz Student Analysis Report.csv"
-            if self.wait_for_file(self.download_path, old_name):
-                new_name = self.instructors[i] + " " + self.lab_num + r" Quiz Student Analysis Report.csv"
-                self.rename_latest_file(self.download_path, new_name)
+            if self.wait_for_file(self.download_path):
+                course_name = self.instructors[i] 
+                self.rename_latest_file(directory=self.download_path, course_name=course_name)
             else:
                 print(self.instructors[i] + " timed out. Did not download report")
-
+            
     # Use hashset to store unique urls. If the url has been added, 
     def check_duplicate_urls(self, url):
         if url in self.url_set:
@@ -122,7 +141,10 @@ class ReportScraper(CanvasScraper):
 
             # Locate the quiz statistics button and click
             stats_xpath = "/html/body/div[3]/div[2]/div[2]/div[3]/div[2]/aside/div/ul/li[1]/a"
+            # stats_xpath = '//*[@id="sidebar_content"]/ul/li[1]/a/text()'
             quiz_statistics = self.driver.find_element("xpath", stats_xpath).click()
+            # stats_url = self.urls[i] + r"/statistics"
+            # self.driver.get(stats_url)
             time.sleep(3)
 
             # try to see if the instructor has a quiz statistics report

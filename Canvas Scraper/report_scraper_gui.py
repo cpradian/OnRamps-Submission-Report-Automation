@@ -89,7 +89,7 @@ class WebScraperGUI(QMainWindow):
         download_path = self.download_entry.text()
         postlab_links_dir = self.csv_entry.text()
         
-        scraper = ReportScraper(driver_path, download_path, postlab_links_dir)
+        scraper = ReportScraper(download_path, postlab_links_dir)
         scraper.scrape_reports()
 
 if __name__ == "__main__":

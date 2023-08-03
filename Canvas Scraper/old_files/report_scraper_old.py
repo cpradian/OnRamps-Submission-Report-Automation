@@ -100,6 +100,31 @@ class ReportScraper(CanvasScraper):
                 self.rename_latest_file(self.download_path, new_name)
             else:
                 print(self.instructors[i] + " timed out. Did not download report")
+        
+    # This function will check if a report is already generated
+    # If it is already generated, it will download. If not, it will call the wait_for_file function
+    def generate_report_old(self, i):
+        # try finding summary statistics if report already generated
+        try:
+            student_analysis = self.driver.find_element("xpath", '//*[@id="summary-statistics"]/header/div/div[2]/div/a/span[2]').click()
+            print("AAAAA")
+            time.sleep(3)
+            # check if file has been downloaded and rename
+            # old_name = r" Quiz Student Analysis Report.csv"
+            if self.wait_for_file(directory=self.download_path):
+                new_name = self.instructors[i] + r" Quiz Student Analysis Report.csv"
+                self.rename_latest_file(self.download_path, new_name)
+            
+        # if report hasn't been generated yet, click button and wait for report to generate
+        except:
+            student_analysis = self.driver.find_element("xpath", '//*[@id="summary-statistics"]/header/div/div[2]/div/button').click()
+            # check if file has been downloaded then rename
+            # old_name = self.lab_num + r" Quiz Student Analysis Report.csv"
+            if self.wait_for_file(self.download_path):
+                new_name = self.instructors[i] + r" Quiz Student Analysis Report.csv"
+                self.rename_latest_file(self.download_path, new_name)
+            else:
+                print(self.instructors[i] + " timed out. Did not download report")
 
     # This is the main function that will execute the webscraper
     def scrape_reports(self):
