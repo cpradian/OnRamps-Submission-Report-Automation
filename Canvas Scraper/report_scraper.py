@@ -138,13 +138,10 @@ class ReportScraper(CanvasScraper):
 
             # Wait for 3 seconds to fully load
             time.sleep(3)
-
+            
             # Locate the quiz statistics button and click
             stats_xpath = "/html/body/div[3]/div[2]/div[2]/div[3]/div[2]/aside/div/ul/li[1]/a"
-            # stats_xpath = '//*[@id="sidebar_content"]/ul/li[1]/a/text()'
             quiz_statistics = self.driver.find_element("xpath", stats_xpath).click()
-            # stats_url = self.urls[i] + r"/statistics"
-            # self.driver.get(stats_url)
             time.sleep(3)
 
             # try to see if the instructor has a quiz statistics report

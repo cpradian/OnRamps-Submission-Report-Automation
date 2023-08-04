@@ -14,7 +14,7 @@ class WebScraperGUI(QMainWindow):
         main_widget = QWidget(self)
         self.setCentralWidget(main_widget)
         layout = QVBoxLayout(main_widget)
-
+        
         # webdriver path
         webdriver_layout = QHBoxLayout()
         self.webdriver_label = QLabel("Webdriver Path:", self)
